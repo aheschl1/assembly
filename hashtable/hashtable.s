@@ -14,7 +14,8 @@
     .globl hash
     .globl hashtable_insert
     .globl query_hashtable
-    .extern calloc
+    #.extern calloc
+    .extern allocate
     .extern free
 
 # in our hashtable, we hold:
@@ -39,9 +40,9 @@ new_hashtable:
     mov ARG1, (%rsp) # save the slot count to top of stack
     sal $3, ARG1 # x8
     add $8, ARG1 # memory to write the length
-    mov $1, ARG2 # memory to write the length
+
     mov $0, %rax  # variadic saftey or something
-    call calloc   # alloc heap mem, initially 0s
+    call allocate   # alloc heap mem, initially 0s
 .post_calloc:
     # now write the slot count
     mov (%rsp), %rcx
@@ -113,13 +114,12 @@ breakaa:
     # now, we have a ptr to the entry at the index we extracted
 
     mov $20, %rdi # nbytes
-    mov $1, %rsi  # nmemb
     
     # save caller saved registers
     push %r8
     push %r9
     push %r10 # push it all, its ok 
-    callq calloc
+    callq allocate
     # restore caller saved
     pop %r10
     pop %r9
@@ -195,7 +195,7 @@ free_hashtable: # TODO this is not done, we will need to free the allocated entr
     add $8, ARG1 # cover the first int
     # call the calloc
     mov $0, %rax
-    callq calloc
+    callq allocate
     # now it is free
     leaveq
     retq
